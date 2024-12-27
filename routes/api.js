@@ -18,7 +18,10 @@ module.exports = function (app) {
       let project = req.params.project;
       let issuesForProject = Array.from(issues.values()).filter(
         (issue) => issue.project === project
-      );
+      ).map(issue => {
+        let { project, ...otherFields } = issue;
+        return otherFields;
+      });
 
       res.json(issuesForProject);
 
@@ -29,39 +32,48 @@ module.exports = function (app) {
     .post(function (req, res) {
       let project = req.params.project;
 
-      let issue_title = req.query.issue_title;
-      let issue_text = req.query.issue_text;
-      let created_by = req.query.created_by;
-      let assigned_to = req.query.assigned_to; //Optional
-      let status_text = req.query.status_text; //Optional
+      let issue_title = req.body.issue_title;
+      let issue_text = req.body.issue_text;
+      let created_by = req.body.created_by;
+      let assigned_to = req.body.assigned_to; //Optional
+      let status_text = req.body.status_text; //Optional
       let created_on = new Date();
       let updated_on = new Date();
       let open = true;
 
-      if (issue_title == "" || issue_text == "" || created_by == "") {
+      if (typeof issue_title === 'undefined' || typeof issue_text === 'undefined' || typeof created_by === 'undefined') {
         res.json({ error: "required field(s) missing" });
       } else {
         const newIssue = {
+          issue_title,
+          issue_text,
+          created_by,
+          assigned_to,
+          status_text,
+          created_on,
+          updated_on,
+          open,
           _id: idGenerator().toString(),
-          issue_title: req.body.issue_title,
-          issue_text: req.body.issue_text,
-          created_by: req.body.created_by,
-          assigned_to: req.body.assigned_to,
-          status_text: req.body.status_text,
-          created_on: created_on,
-          updated_on: updated_on,
-          open: open,
-          project: project,
+          project,
         };
 
         issues.set(newIssue._id, newIssue);
         console.log(newIssue);
 
-        res.json(issues.get(newIssue._id));
+        res.json({
+          assigned_to,
+          status_text,
+          open,
+          _id: newIssue._id,
+          issue_title,
+          issue_text,
+          created_by,
+          created_on,
+          updated_on,
+        });
       }
 
       // 3. The POST request to /api/issues/{projectname} will return the created object, and must include all of the submitted fields. Excluded optional fields will be returned as empty strings. Additionally, include created_on (date/time), updated_on (date/time), open (boolean, true for open - default value, false for closed), and _id.
-      // 4. If you send a POST request to /api/issues/{projectname} without the required fields, returned will be the error { error: 'required field(s) missing' }
     })
 
     .put(function (req, res) {
