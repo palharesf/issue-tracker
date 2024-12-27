@@ -57,14 +57,16 @@ module.exports = function (app) {
     .post(function (req, res) {
       let project = req.params.project;
 
-      let issue_title = req.body.issue_title;
-      let issue_text = req.body.issue_text;
-      let created_by = req.body.created_by;
-      let assigned_to = req.body.assigned_to; //Optional
-      let status_text = req.body.status_text; //Optional
+      const {
+        issue_title,
+        issue_text,
+        created_by,
+        assigned_to,
+        status_text,
+      } = req.body;
       let created_on = new Date();
       let updated_on = new Date();
-      let open = true;
+      let open = true; //Default
 
       if (
         typeof issue_title === "undefined" ||
@@ -89,15 +91,15 @@ module.exports = function (app) {
         issues.set(newIssue._id, newIssue);
 
         res.json({
-          assigned_to,
-          status_text,
-          open,
+          assigned_to: newIssue.assigned_to,
+          status_text: newIssue.status_text,
+          open: newIssue.open,
           _id: newIssue._id,
-          issue_title,
-          issue_text,
-          created_by,
-          created_on,
-          updated_on,
+          issue_title: newIssue.issue_title,
+          issue_text: newIssue.issue_text,
+          created_by: newIssue.created_by,
+          created_on: newIssue.created_on,
+          updated_on: newIssue.updated_on,
         });
       }
 
