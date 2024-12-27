@@ -59,7 +59,7 @@ suite('Functional Tests', function () {
                 done();
             });
     });
-    
+
     test('View issues on a project: GET request to /api/issues/{project}', function (done) {
         chai.request(server)
             .get('/api/issues/test')
@@ -96,11 +96,81 @@ suite('Functional Tests', function () {
                 done();
             });
     });
-    // Update one field on an issue: PUT request to /api/issues/{project}
-    // Update multiple fields on an issue: PUT request to /api/issues/{project}
-    // Update an issue with missing _id: PUT request to /api/issues/{project}
-    // Update an issue with no fields to update: PUT request to /api/issues/{project}
-    // Update an issue with an invalid _id: PUT request to /api/issues/{project}
+
+    test('Update one field on an issue: PUT request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .put('/api/issues/test')
+            .send({
+                _id: '1',
+                issue_title: 'Updated title'
+            })
+            .end(function (err, res) {
+                console.log(res.body);
+                assert.equal(res.status, 200);
+                assert.equal(res.body.result, 'successfully updated');
+                assert.equal(res.body._id, '1');
+                done();
+            });
+    });
+
+    test('Update multiple fields on an issue: PUT request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .put('/api/issues/test')
+            .send({
+                _id: '1',
+                issue_title: 'Updated title',
+                issue_text: 'Updated text'
+            })
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.result, 'successfully updated');
+                assert.equal(res.body._id, '1');
+                done();
+            });
+    });
+
+    test('Update an issue with missing _id: PUT request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .put('/api/issues/test')
+            .send({
+                issue_title: 'Updated title'
+            })
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.error, 'missing _id');
+                done();
+            });
+    });
+
+    test('Update an issue with no fields to update: PUT request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .put('/api/issues/test')
+            .send({
+                _id: 'valid_id'
+            })
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.error, 'no update field(s) sent');
+                assert.equal(res.body._id, 'valid_id');
+                done();
+            });
+    });
+
+    test('Update an issue with an invalid _id: PUT request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .put('/api/issues/test')
+            .send({
+                _id: 'invalid_id',
+                issue_title: 'Updated title'
+            })
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.error, 'could not update');
+                assert.equal(res.body._id, 'invalid_id');
+                done();
+            });
+    });
+
     // Delete an issue: DELETE request to /api/issues/{project}
     // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
     // Delete an issue with missing _id: DELETE request to /api/issues/{project}
