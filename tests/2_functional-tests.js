@@ -105,7 +105,6 @@ suite('Functional Tests', function () {
                 issue_title: 'Updated title'
             })
             .end(function (err, res) {
-                console.log(res.body);
                 assert.equal(res.status, 200);
                 assert.equal(res.body.result, 'successfully updated');
                 assert.equal(res.body._id, '1');
@@ -171,8 +170,43 @@ suite('Functional Tests', function () {
             });
     });
 
-    // Delete an issue: DELETE request to /api/issues/{project}
-    // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
-    // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+    test('Delete an issue: DELETE request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .delete('/api/issues/test')
+            .send({
+                _id: '1'
+            })
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.result, 'successfully deleted');
+                assert.equal(res.body._id, '1');
+                done();
+            });
+    });
+
+    test('Delete an issue with an invalid _id: DELETE request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .delete('/api/issues/test')
+            .send({
+                _id: 'invalid_id'
+            })
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.error, 'could not delete');
+                assert.equal(res.body._id, 'invalid_id');
+                done();
+            });
+    });
+
+    test('Delete an issue with missing _id: DELETE request to /api/issues/{project}', function (done) {
+        chai.request(server)
+            .delete('/api/issues/test')
+            .send({})
+            .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.body.error, 'missing _id');
+                done();
+            });
+    });
   
 });
