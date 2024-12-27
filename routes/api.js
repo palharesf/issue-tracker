@@ -25,7 +25,6 @@ module.exports = function (app) {
 
       res.json(issuesForProject);
 
-      // 5. You can send a GET request to /api/issues/{projectname} for an array of all issues for that specific projectname, with all the fields present for each issue.
       // 6. You can send a GET request to /api/issues/{projectname} and filter the request by also passing along any field and value as a URL query (ie. /api/issues/{project}?open=false). You can pass one or more field/value pairs at once.
     })
 
@@ -45,16 +44,16 @@ module.exports = function (app) {
         res.json({ error: "required field(s) missing" });
       } else {
         const newIssue = {
-          issue_title,
-          issue_text,
-          created_by,
-          assigned_to,
-          status_text,
+          issue_title: issue_title ? issue_title.toString() : '',
+          issue_text: issue_text ? issue_text.toString() : '',
+          created_by: created_by ? created_by.toString() : '',
+          assigned_to: assigned_to ? assigned_to.toString() : '',
+          status_text: status_text ? status_text.toString() : '',
           created_on,
           updated_on,
           open,
           _id: idGenerator().toString(),
-          project,
+          project: project ? project.toString() : '',
         };
 
         issues.set(newIssue._id, newIssue);
