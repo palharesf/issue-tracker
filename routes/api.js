@@ -87,7 +87,6 @@ module.exports = function (app) {
         };
 
         issues.set(newIssue._id, newIssue);
-        console.log(newIssue);
 
         res.json({
           assigned_to,
@@ -109,7 +108,6 @@ module.exports = function (app) {
       let project = req.params.project;
 
       const { _id, ...fields } = req.body;
-      console.log("Fields: ",fields);
 
       if (typeof _id == "undefined") {
         res.json({ error: "missing _id" });
@@ -122,12 +120,20 @@ module.exports = function (app) {
         issues.set(_id, { ...issue, ...fields, updated_on: new Date() });
         res.json({ result: "successfully updated", _id });
       }
-
     })
 
     .delete(function (req, res) {
       let project = req.params.project;
 
-      // 10. You can send a DELETE request to /api/issues/{projectname} with an _id to delete an issue. If no _id is sent, the return value is { error: 'missing _id' }. On success, the return value is { result: 'successfully deleted', '_id': _id }. On failure, the return value is { error: 'could not delete', '_id': _id }.
+      const { _id } = req.body;
+
+      if (typeof _id == "undefined") {
+        res.json({ error: "missing _id" });
+      } else if (!issues.has(_id)) {
+        res.json({ error: "could not delete", _id: _id });
+      } else {
+        issues.delete(_id);
+        res.json({ result: "successfully deleted", _id });
+      }
     });
 };
