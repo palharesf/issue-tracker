@@ -16,16 +16,42 @@ module.exports = function (app) {
 
     .get(function (req, res) {
       let project = req.params.project;
-      let issuesForProject = Array.from(issues.values()).filter(
-        (issue) => issue.project === project
-      ).map(issue => {
-        let { project, ...otherFields } = issue;
-        return otherFields;
-      });
+
+      const {
+        issue_title,
+        issue_text,
+        created_by,
+        assigned_to,
+        status_text,
+        created_on,
+        updated_on,
+        open,
+        _id,
+      } = req.query;
+
+      let filter = {};
+      if (issue_title) filter.issue_title = issue_title;
+      if (issue_text) filter.issue_text = issue_text;
+      if (created_by) filter.created_by = created_by;
+      if (assigned_to) filter.assigned_to = assigned_to;
+      if (status_text) filter.status_text = status_text;
+      if (created_on) filter.created_on = created_on;
+      if (updated_on) filter.updated_on = updated_on;
+      if (open != null) filter.open = open;
+      if (_id) filter._id = _id;
+
+      let issuesForProject = Array.from(issues.values())
+        .filter(
+          (issue) =>
+            issue.project === project &&
+            Object.keys(filter).every((key) => issue[key] === filter[key])
+        )
+        .map((issue) => {
+          let { project, ...otherFields } = issue;
+          return otherFields;
+        });
 
       res.json(issuesForProject);
-
-      // 6. You can send a GET request to /api/issues/{projectname} and filter the request by also passing along any field and value as a URL query (ie. /api/issues/{project}?open=false). You can pass one or more field/value pairs at once.
     })
 
     .post(function (req, res) {
@@ -40,20 +66,24 @@ module.exports = function (app) {
       let updated_on = new Date();
       let open = true;
 
-      if (typeof issue_title === 'undefined' || typeof issue_text === 'undefined' || typeof created_by === 'undefined') {
+      if (
+        typeof issue_title === "undefined" ||
+        typeof issue_text === "undefined" ||
+        typeof created_by === "undefined"
+      ) {
         res.json({ error: "required field(s) missing" });
       } else {
         const newIssue = {
-          issue_title: issue_title ? issue_title.toString() : '',
-          issue_text: issue_text ? issue_text.toString() : '',
-          created_by: created_by ? created_by.toString() : '',
-          assigned_to: assigned_to ? assigned_to.toString() : '',
-          status_text: status_text ? status_text.toString() : '',
+          issue_title: issue_title ? issue_title.toString() : "",
+          issue_text: issue_text ? issue_text.toString() : "",
+          created_by: created_by ? created_by.toString() : "",
+          assigned_to: assigned_to ? assigned_to.toString() : "",
+          status_text: status_text ? status_text.toString() : "",
           created_on,
           updated_on,
           open,
           _id: idGenerator().toString(),
-          project: project ? project.toString() : '',
+          project: project ? project.toString() : "",
         };
 
         issues.set(newIssue._id, newIssue);
